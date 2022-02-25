@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://flow:flow_Passw0rd@10.103.22.108:27017,10.103.22.109:27017,10.103.22.110:27017/flow?slaveOk=true&replicaSet=zgjt_test&write=1&readPreference=secondaryPreferred&connectTimeoutMS=300000
+
+data:
+  provider:
+    kafka:
+      topic: kafka-stream-in
