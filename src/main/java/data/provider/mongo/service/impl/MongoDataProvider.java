@@ -1,6 +1,8 @@
 package data.provider.mongo.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import data.provider.entity.RiskFlowBizParam;
+import data.provider.entity.StatisticsCalMeta;
 import data.provider.mongo.repository.cond.PageResult;
 import data.provider.mongo.repository.cond.RiskFlowBizParamDto;
 import data.provider.mongo.service.DataProviderService;
@@ -12,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @version v1.0
@@ -45,7 +49,17 @@ public class MongoDataProvider implements DataProviderService {
                 break;
             }
             for (RiskFlowBizParam bizParam : pageResult.getLists()) {
-                KafkaUtil.writeToKafka(providerTopic, bizParam.getRiskContent());
+                JSONObject reqObj = new JSONObject();
+                reqObj.put("data", bizParam.getRiskContent());
+                List<StatisticsCalMeta> metaList = new ArrayList<>();
+                StatisticsCalMeta statisticsCalMeta = new StatisticsCalMeta();
+                statisticsCalMeta.setCondition("merNo");
+                statisticsCalMeta.setField("tradeAmt");
+                statisticsCalMeta.setFrequency("none");
+                statisticsCalMeta.setMethod("COUNT");
+                metaList.add(statisticsCalMeta);
+                reqObj.put("metaList", metaList);
+                KafkaUtil.writeToKafka(providerTopic, reqObj.toJSONString());
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
