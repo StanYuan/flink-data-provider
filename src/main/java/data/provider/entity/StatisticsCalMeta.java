@@ -23,4 +23,6 @@ public class StatisticsCalMeta {
     //统计频率 年，月，日，小时，分钟，秒，历史
     private String frequency;
 
+    private String ruleCode;
+
 }

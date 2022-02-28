@@ -48,16 +48,24 @@ public class MongoDataProvider implements DataProviderService {
             if (pageResult.getLists() == null || pageResult.getLists().isEmpty()) {
                 break;
             }
+            int count = 0;
             for (RiskFlowBizParam bizParam : pageResult.getLists()) {
                 JSONObject reqObj = new JSONObject();
                 reqObj.put("data", bizParam.getRiskContent());
                 List<StatisticsCalMeta> metaList = new ArrayList<>();
                 StatisticsCalMeta statisticsCalMeta = new StatisticsCalMeta();
-                statisticsCalMeta.setCondition("merNo");
+                statisticsCalMeta.setCondition("openId");
                 statisticsCalMeta.setField("tradeAmt");
-                statisticsCalMeta.setFrequency("none");
-                statisticsCalMeta.setMethod("COUNT");
+                statisticsCalMeta.setFrequency("NONE");
+                if(count % 2 ==0){
+                    statisticsCalMeta.setMethod("SUM");
+                }
+                else{
+                    statisticsCalMeta.setMethod("COUNT");
+                }
+                statisticsCalMeta.setRuleCode("test-rule");
                 metaList.add(statisticsCalMeta);
+                //TODO查询bizCode下面流量规则
                 reqObj.put("metaList", metaList);
                 KafkaUtil.writeToKafka(providerTopic, reqObj.toJSONString());
                 try {
@@ -65,6 +73,7 @@ public class MongoDataProvider implements DataProviderService {
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
                 }
+                count++;
             }
             riskFlowBizParamDto.setPageNum(riskFlowBizParamDto.getPageNum() + 1);
         }
